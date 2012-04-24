@@ -1,0 +1,12 @@
+{application, flexihash,
+ [
+  {description, "Erlang Flexihash implementation"},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { flexihash_app, []}},
+  {env, []}
+ ]}.
