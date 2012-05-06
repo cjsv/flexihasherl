@@ -105,6 +105,6 @@ config_change(_Changed, _New, _Remove) ->
                    ok |
                    {error, Reason :: term()}.
 start() ->
-    application:start(?MODULE).
+    application:start(flexihash).
 
 %%% functions internal to your implementation

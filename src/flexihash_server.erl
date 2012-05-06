@@ -9,10 +9,7 @@
 %%-export([format_status/2]). % optional
 -export([start_link/0]). % gen_server api
 
-%%% implementation records
-
--record(state, {replicas, tables}).
--record(table, {name, sorted, list}).
+-include("flexihash.hrl").
 
 %%% required callbacks
 
@@ -224,7 +221,7 @@ picktable([H | T], Name, Front) ->
 %% Generate the positions in the table for the specified target.
 %%
 positions(Target, Replicas) ->
-    positions(Target, erlang:crc32(Target), 0, [], Replicas).
+    positions(Target, Replicas, erlang:crc32(Target), 0, []).
 %%
 positions(_Target, Replicas, _BaseCRC, Replicas, Acc) ->
     Acc;
@@ -268,25 +265,54 @@ sorttable(Table) ->
             Table#table{sorted = true, list = lists:sort(Table#table.list)}
     end.
 
-%% Given a value, find the appropriate target in the table.
+%% Given a value, find the appropriate target in the table. Requires
+%% the table's list to be sorted.
 %%
-lookup(Table, Value) ->
+lookup(Table, Value) when is_list(Value) ->
+    lookup(Table, list_to_binary(Value));
+lookup(Table, Value) when is_binary(Value) ->
     Hash = erlang:crc32(Value),
-    listlook(Hash, Table#table.list, Table#table.list).
+    listlook(Hash,
+             lists:dropwhile(fun({Pos, _}) -> Hash > Pos end,
+                             Table#table.list),
+             Table#table.list).
 
 %% Internal implementation of lookup. Requires the table's list to be sorted.
 %%
-listlook(Hash, [{PosN, _}], [{Pos0, Targ0} | _]) ->
-    case (PosN < Hash) and (Hash =< Pos0) of
-        true ->
-            Targ0
-    end;
-listlook(Hash, [{Pos0, _}, {Pos1, Targ1} | T], All) ->
-    case (Pos0 < Hash) and (Hash =< Pos1) of
-        true ->
-            Targ1;
-        _ ->
-            listlook(Hash, [{Pos1, Targ1} | T], All)
-    end;
 listlook(_Hash, [], []) ->
-    {error, empty}.
+    {error, empty};
+listlook(_Hash, [], [{_Pos, Targ} | _T]) ->
+    Targ;
+listlook(Hash, [{Pos, Targ} | _T], _) when Hash =< Pos ->
+    Targ.
+
+%%% testing
+
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+
+server_test() ->
+    Target1 = "Y7tGZe}9pLhB$1TQ",
+    Target2 = "j=}?c5/_*J&3#Mp*",
+    {ok, State0} = init([]),
+    {reply, ok, State1} = handle_call({replicas, 2}, none, State0),
+    {reply, ok, State2} = handle_call({newtable, rep2}, none, State1),
+    Result3 = handle_call({addtargetlist, rep2, [Target1, Target2]},
+                          none,
+                          State2),
+    {reply, ok, State3} = Result3,
+    {reply, Result, State4} = handle_call(dump, none, State3),
+    {ok, Table, _Rest} = picktable(Result#state.tables, rep2),
+    List = Table#table.list,
+    Binary1 = list_to_binary(Target1),
+    Binary1 = proplists:get_value(2194496399, List),
+    Binary1 = proplists:get_value(4123683609, List),
+    Binary2 = list_to_binary(Target2),
+    Binary2 = proplists:get_value(1727109567, List),
+    Binary2 = proplists:get_value(301377833, List),
+    Key = "This is a key",
+    943121022 = erlang:crc32(Key), 
+    {reply, Lookup, _State5} = handle_call({lookup, rep2, Key}, none, State4),
+    Binary2 = Lookup.
+
+-endif.

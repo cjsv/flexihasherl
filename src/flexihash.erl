@@ -82,3 +82,61 @@ start() ->
     flexihash_app:start().
 
 %%% functions internal to your implementation
+
+%%% testing
+
+-ifdef(TEST).
+-include("flexihash.hrl"). % only the tests need the record structure
+-include_lib("eunit/include/eunit.hrl").
+
+client_test() ->
+    Target1 = "Y7tGZe}9pLhB$1TQ",
+    Target2 = "j=}?c5/_*J&3#Mp*",
+    start(),
+    ok = replicas(2),
+    ok = newtable(rep2),
+    ok = addtargetlist(rep2, [Target1, Target2]),
+    Result = gen_server:call(flexihash_server, dump),
+    TableList = Result#state.tables,
+    [Table] = TableList,
+    List = Table#table.list,
+    Binary1 = list_to_binary(Target1),
+    Binary2 = list_to_binary(Target2),
+    Key = "This is a key",
+    CRC32 = erlang:crc32(Key), 
+    %% these 5 values are identical to what the PHP flexihash produces
+    Binary1 = proplists:get_value(2194496399, List),
+    Binary1 = proplists:get_value(4123683609, List),
+    Binary2 = proplists:get_value(1727109567, List),
+    Binary2 = proplists:get_value(301377833, List),
+    943121022 = CRC32,
+    Lookup = lookup(rep2, Key),
+    Binary2 = Lookup,
+    ok = deltable(rep2),
+    application:stop(flexihash).
+
+rep3_test() ->
+    start(),
+    ok = replicas(3),
+    ok = newtable(rep3),
+    ok = addtargetlist(rep3, ["A", "B"]),
+    ok = newtable(rep3a),
+    ok = addtarget(rep3a, "B"),
+    ok = addtarget(rep3a, "A"),
+    Lookup = lookup(rep3, "C"),
+    Lookup1 = lookup(rep3a, "C"),
+    Lookup = Lookup1,
+    ok = addtarget(rep3, "D"),
+    ok = deltarget(rep3, "D"),
+    Lookup2 = lookup(rep3, "C"),
+    Lookup = Lookup2,
+    Result = gen_server:call(flexihash_server, dump),
+    [Table1, Table2] = Result#state.tables,
+    List1 = Table1#table.list,
+    List2 = Table2#table.list,
+    List1 = List2,
+    ok = deltable(rep3),
+    ok = deltable(rep3a),
+    application:stop(flexihash).
+
+-endif.
