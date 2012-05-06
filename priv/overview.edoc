@@ -1,0 +1,21 @@
+@author Christopher Vance <cjsv@abacorix.com>.
+@title Consistent Hashing
+
+@doc Consistent Hashing is somewhat explained in
+[http://en.wikipedia.org/Consistent_hashing]. It provides a way for a
+key to be allocated reasonably evenly, but nevertheless consistently
+among multiple targets.
+
+The flexihash application provides an Erlang server which
+interoperates with the PHP code in [http://github.com/pda/flexihash],
+using crc32 to provide some of the (pseudo-)randomisation and the
+default value of 64 replicas. The user API is provided by routines in
+the flexihash module.
+
+Multiple tables can be maintained concurrently.  Targets may be added
+and deleted as required.
+
+The Erlang implementation of Consistent Hashing in
+[http://github.com/basho/riak_core/blob/master/src/chash.erl] uses sha1
+and a different replica algorithm, and accordingly provides different
+results.
