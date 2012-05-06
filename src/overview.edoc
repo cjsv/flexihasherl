@@ -1,5 +1,6 @@
-@author Christopher Vance <cjsv@abacorix.com>.
 @title Consistent Hashing
+@author Christopher Vance <cjsv@abacorix.com>.
+% Copyright (c) 2012 Christopher Vance.
 
 @doc Consistent Hashing is somewhat explained in
 [http://en.wikipedia.org/Consistent_hashing]. It provides a way for a
