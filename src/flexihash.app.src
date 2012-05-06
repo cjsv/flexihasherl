@@ -2,7 +2,7 @@
 {application,
  flexihash,
  [{description, "Consistent Hashing - an Erlang implementation of Flexihash"},
-  {vsn, "0.9.2"},
+  {vsn, "1.0"},
   {registered, []},
   {applications, [kernel, stdlib]},
   {mod, {flexihash_app, []}},
