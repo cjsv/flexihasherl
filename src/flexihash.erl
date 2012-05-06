@@ -20,57 +20,58 @@ replicas(Replicas) when is_integer(Replicas), Replicas > 0 ->
 %% @doc Create a new empty table. If the name refers to an existing table
 %% it will be replaced. Implemented via flexihash_server.
 %%
--spec newtable(Name :: atom()) ->
+-spec newtable(TableName :: atom()) ->
                       ok.
-newtable(Name) when is_atom(Name) ->
-    gen_server:call(flexihash_server, {newtable, Name}).
+newtable(TableName) when is_atom(TableName) ->
+    gen_server:call(flexihash_server, {newtable, TableName}).
 
 %% @doc Delete a table. Succeeds quietly if the table does not
 %% exist. Implemented via flexihash_server.
 %%
--spec deltable(Name :: atom()) ->
+-spec deltable(TableName :: atom()) ->
                       ok.
-deltable(Name) when is_atom(Name) ->
-    gen_server:call(flexihash_server, {deltable, Name}).
+deltable(TableName) when is_atom(TableName) ->
+    gen_server:call(flexihash_server, {deltable, TableName}).
 
 %% @doc Add one Target (with current number of replicas) to the
 %% specified table, which must exist. Implemented via flexihash_server.
 %%
--spec addtarget(Name :: atom(), Target :: string() | binary()) ->
+-spec addtarget(TableName :: atom(), Target :: string() | binary()) ->
                        ok |
                        {error, notable}.
-addtarget(Name, Target) when is_atom(Name) ->
-    gen_server:call(flexihash_server, {addtarget, Name, Target}).
+addtarget(TableName, Target) when is_atom(TableName) ->
+    gen_server:call(flexihash_server, {addtarget, TableName, Target}).
 
 %% @doc Equivalent to invoking addtarget multiple times. Implemented
 %% via flexihash_server.
 %%
--spec addtargetlist(Name :: atom(), TargetList :: [string() | binary()]) ->
+-spec addtargetlist(TableName :: atom(),
+                    TargetList :: [string() | binary()]) ->
                            ok |
                            {error, notable}.
-addtargetlist(Name, TargetList) when is_atom(Name) ->
-    gen_server:call(flexihash_server, {addtargetlist, Name, TargetList}).
+addtargetlist(TableName, TargetList) when is_atom(TableName) ->
+    gen_server:call(flexihash_server, {addtargetlist, TableName, TargetList}).
 
 %% @doc Delete all replicas of the specified target from the named
 %% table, which must exist. Succeeds quietly if the target was not
 %% present. Implemented via flexihash_server.
 %%
--spec deltarget(Name :: atom(), Target :: string() | binary()) ->
+-spec deltarget(TableName :: atom(), Target :: string() | binary()) ->
                        ok |
                        {error, notable}.
-deltarget(Name, Target) when is_atom(Name) ->
-    gen_server:call(flexihash_server, {deltarget, Name, Target}).
+deltarget(TableName, Target) when is_atom(TableName) ->
+    gen_server:call(flexihash_server, {deltarget, TableName, Target}).
 
 %% @doc Determine which target stored in the named table, which
 %% must exist, is appropriate to the requested Value. Error if
 %% the table is empty. Implemented via flexihash_server.
 %%
--spec lookup(Name :: atom(), Value :: string() | binary()) ->
+-spec lookup(TableName :: atom(), Value :: string() | binary()) ->
                     ok |
                     {error, notable} |
                     {error, empty}.
-lookup(Name, Value) when is_atom(Name) ->
-    gen_server:call(flexihash_server, {lookup, Name, Value}).
+lookup(TableName, Value) when is_atom(TableName) ->
+    gen_server:call(flexihash_server, {lookup, TableName, Value}).
 
 %%% start the application
 
