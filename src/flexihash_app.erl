@@ -60,7 +60,6 @@ stop(_State) ->
 start_phase(_Phase, _StartType, _PhaseArgs) ->
     ok.
 -endif.
-%% @clear
 
 -ifdef(NOTDEF).
 %% invoked by
@@ -78,7 +77,6 @@ start_phase(_Phase, _StartType, _PhaseArgs) ->
 prep_stop(State) ->
     State.
 -endif.
-%% @clear
 
 -ifdef(NOTDEF).
 %% invoked by
@@ -97,7 +95,6 @@ prep_stop(State) ->
 config_change(_Changed, _New, _Remove) ->
     ok.
 -endif.
-%% @clear
 
 %%% application api
 
